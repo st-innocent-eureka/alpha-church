@@ -1,4 +1,9 @@
 +++
+#Order of the home page feature blocks (banner stays on top, CTA at bottom).
+#Available features: "services", "recent_posts", "feature_icons", "feature_images".
+#Omit this list to use the default order shown below.
+#features = ["recent_posts", "services", "feature_icons", "feature_images"]
+
 [banner]
   [[banner.button]]
       url = "/contact"

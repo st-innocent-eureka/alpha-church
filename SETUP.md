@@ -94,6 +94,16 @@ The landing page is quite customisable. It consists of six blocks: a banner, an 
 
 Settings for the landing page are configured in the frontmatter of `/content/_index.md`. There is an example configuration in the `exampleSite` folder.
 
+The order of the feature blocks (service information, recent posts, feature icons, feature images) is configurable with a `features` list:
+
+```
+features = ["recent_posts", "services", "feature_icons", "feature_images"]
+```
+
+Only the features named in the list are rendered, in the order given (each still needs to be enabled in its own settings block). If the list is omitted, all four features are rendered in the default order: services, recent posts, feature icons, feature images. The banner always stays at the top of the page and the contact form (CTA) at the bottom.
+
+Each feature block is a partial in `layouts/_partials/home/`, so new features can be added by creating a partial there and naming it in the `features` list.
+
 #### a. Banner
 The banner section requires a background image to be set. This image should be 1800*1200 px, and a relatively simple image will probably look best. The filename of this banner is set in `hugo.toml`
 ```

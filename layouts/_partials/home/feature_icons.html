@@ -1,0 +1,23 @@
+{{/* Feature icons feature: tiles with a fontawesome icon, title and text. */}}
+{{ if .Params.Feature_icons.enable }}
+	{{ $tiles := .Params.Feature_icons.tile }}
+	{{ $len := (len $tiles) }}
+	<a name="feature-icons"></a>
+	<section class="box special features">
+		<div class="features-row">
+			{{ range $index, $key := $tiles}}
+				<section>
+					{{ if $key.url }}<a href="{{ $key.url | absURL }}"><div>{{ end }}
+						<span class="icon major {{ $key.icon_pack }} {{ $key.icon }} accent{{- $key.accent -}}"></span>
+						<h3>{{ $key.title }}</h3>
+						<p>{{ $key.text | markdownify }}</p>
+					{{ if $key.url }}</div></a>{{ end }}
+				</section>
+				{{ if and (mod $index 2) (lt (add $index 1) $len) }}
+						</div>
+						<div class="features-row">
+				{{ end }}
+			{{ end }}
+		</div>
+	</section>
+{{ end }}
