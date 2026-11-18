@@ -90,7 +90,7 @@ As you're developing your site, you'll need to check the podcast feed is valid b
 The podcast feed is found at `/sermons/index.xml`.
 
 ### 5. Landing (Home) page
-The landing page is quite customisable. It consists of five blocks: a banner, an area for information about services (including a map), featured icons, featured images, and a contact form.
+The landing page is quite customisable. It consists of six blocks: a banner, an area for information about services (including a map), featured icons, featured images, links to recent posts, and a contact form.
 
 Settings for the landing page are configured in the frontmatter of `/content/_index.md`. There is an example configuration in the `exampleSite` folder.
 
@@ -128,6 +128,19 @@ The value of the `icon` and `icon_pack` setting is found on the FontAwesome site
 
 #### d. Feature Images
 Like the *Feature Icons* this section looks best with an even number of entries.
+
+#### e. Recent Posts
+This section displays links to your most recent posts, each with its publication date.
+
+```
+[recent_posts]
+  enable = true
+  count = 3
+  section = "posts"
+  button_text = "All posts"
+```
+
+`count` sets the number of posts to link to (default: 5) and `section` sets the content section they're pulled from (default: `posts`). The heading defaults to "Recent Posts" (translated to the site language); override it with `title`. If `button_text` is set, a button with that text links to the section's archive page. The section is hidden if there are no posts to show.
 
 ### 6. Map
 This theme makes use of [open street maps](https://openstreetmap.org) on the landing page and as a shortcode.
