@@ -102,6 +102,8 @@ features = ["recent_posts", "services", "feature_icons", "feature_images"]
 
 Only the features named in the list are rendered, in the order given (each still needs to be enabled in its own settings block). If the list is omitted, all four features are rendered in the default order: services, recent posts, feature icons, feature images. The banner always stays at the top of the page and the contact form (CTA) at the bottom.
 
+Note that entries in the list are not deduplicated: a feature named twice is rendered twice. Avoid repeats — duplicate blocks produce duplicate HTML anchors, and a repeated services block breaks its map (the map container ID must be unique on the page).
+
 Each feature block is a partial in `layouts/_partials/home/`, so new features can be added by creating a partial there and naming it in the `features` list.
 
 #### a. Banner
