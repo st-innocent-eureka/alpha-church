@@ -203,18 +203,39 @@ You can also use Mapbox. To do this you'll need an [API Key from Mapbox](https:/
 > If `marker_title` and `marker_address` are not set, the popup will not be rendered in the map.
 
 ### 7. Contact Form
-You can have a contact form using either a [netlify form](https://www.netlify.com/docs/form-handling/) (if you're deploying with netlify) or [formspree](https://formspree.io)
+You can have a contact form using a [netlify form](https://www.netlify.com/docs/form-handling/) (if you're deploying with netlify), [formspree](https://formspree.io), or a PHP mail script on your own server.
 ```
 [params.contact]
   service = ""
   confirm_page = "/contact_thanks"
   formspree_email=""
 ```
-With these setting, set *service* to either `service = "netlify"` or `service = "formspree"`.
+With these setting, set *service* to `service = "netlify"`, `service = "formspree"` or `service = "php"`.
 
 If you're using formspree, you'll also need to set `formspree_email` to your email address.
 
 If you're using netlify, you'll also want to set the `confirm_page = "url"` to a page on your site. That way after a user submits the form they'll be sent to a page with your customised thank you message, rather than a generic netlify page.
+
+#### PHP mail script (e.g. sending via Google Workspace)
+If your site is hosted on a server that runs PHP, set `service = "php"` and copy `static/contact_mail.php` from the `exampleSite` to your site's `static/` folder. The script sends the form through your organisation's Google Workspace account using [PHPMailer](https://github.com/PHPMailer/PHPMailer). Install the dependencies with [Composer](https://getcomposer.org), ideally outside the web root:
+
+```
+composer require phpmailer/phpmailer league/oauth2-google
+```
+
+Edit the settings at the top of `contact_mail.php` (recipient, sender, subject, redirect pages, and the path to Composer's `vendor/autoload.php`). The sender (`$from`) must be the authenticated Workspace account or a verified "send as" alias of it.
+
+Google no longer accepts plain account passwords for SMTP. Choose one of the three supported modes via `$smtp_mode`:
+
+* **`relay`** — Google's [SMTP relay service](https://support.google.com/a/answer/176600) (`smtp-relay.gmail.com`). Authenticates by your server's IP address, so no credentials are stored in code. A Workspace admin must allow the server's IP under *Admin console > Apps > Google Workspace > Gmail > Routing > SMTP relay service* (restrict allowed senders to your domains). The server needs a static IP. This is Google's recommended option for websites.
+* **`app_password`** — `smtp.gmail.com` authenticated with a [Google app password](https://support.google.com/accounts/answer/185833). The sending account needs 2-Step Verification, and your Workspace admin must allow app passwords (they can be disabled org-wide, e.g. by security-key-only 2SV). Note that app passwords are revoked whenever the account password changes.
+* **`oauth2`** — `smtp.gmail.com` authenticated with OAuth2 (XOAUTH2). Most robust long-term. Setup:
+  1. In the [Google Cloud console](https://console.cloud.google.com), create a project, enable the **Gmail API**, and configure the OAuth consent screen as **Internal** (so refresh tokens don't expire after 7 days).
+  2. Create an OAuth client ID of type **Desktop app**.
+  3. Run the one-time helper `contact_oauth_setup.php` (in `exampleSite`, next to `hugo.toml`) on any machine with PHP: `php contact_oauth_setup.php`. It prints a URL; sign in with the sending Workspace account, consent, and paste back the redirect URL. It outputs the refresh token.
+  4. Set `$smtp_mode = 'oauth2'` and fill in `$oauth_client_id`, `$oauth_client_secret` and `$oauth_refresh_token`.
+
+**Keep credentials secret.** Rather than editing credentials into `contact_mail.php` (which lives in your web root), put them in a separate config file *outside* the web root — the script automatically loads `../contact_mail_config.php` relative to itself if present, and any variables set there override the defaults. Never commit credentials to git. Sending failures are logged to the PHP error log.
 
 If you'd like a contact form on another page, use an inline shortcode `{{< contact.inline >}}{{ partial "contact" . }}{{< /contact.inline >}}` **N.B. inline shortcodes must be [enabled in your config file](https://gohugo.io/templates/shortcode-templates/#inline-shortcodes).**
 

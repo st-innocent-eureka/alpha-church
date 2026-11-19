@@ -162,6 +162,10 @@ enableEmoji = true
     #
     #If you use php, you need to host this site on a Server capable of running php.
     # Please edit the /static/contact_mail.php file from the exampleSite.
+    # It sends via your Google Workspace account (SMTP relay, app password or
+    # OAuth2) and needs PHPMailer installed with Composer:
+    #   composer require phpmailer/phpmailer league/oauth2-google
+    # See SETUP.md ("Contact Form") for the Google-side setup.
     service = "netlify" #or "formspree" or "php"
     confirm_page = "/contact_thanks" #only used by netlify
     # formspree_formid="" #only used by formspree
