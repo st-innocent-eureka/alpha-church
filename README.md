@@ -2,7 +2,7 @@
 
 This theme is based on [Alpha by HTML5 UP](//html5up.net/alpha) [@ajlkn](//twitter.com/ajlkn). Free for personal and commercial use under the [CCA 3.0 license](//github.com/funkydan2/alpha-church/blob/master/LICENSE.md).
 
-A clean, super minimal responsive template geared towards churches though it could be adapted for other community groups. This theme includes a landing page, open street maps, blog posts and a sermon podcast.
+A clean, super minimal responsive template geared towards churches though it could be adapted for other community groups. This theme includes a landing page, open street maps, blog posts, a sermon podcast, and a contact form with optional self-hosted captcha ([ALTCHA](https://altcha.org)).
 
 ![Screenshot](https://github.com/funkydan2/alpha-church/raw/master/images/screenshot.png)
 
@@ -42,3 +42,5 @@ If you need some help setting up your website, instructions are available [here]
 * [Respond.js](//j.mp/respondjs)
 * [Skel](//skel.io)
 * [Plyr](//plyr.io)
+* [ALTCHA](//altcha.org) (MIT) — self-hosted captcha widget for the PHP contact form; license text in `static/altcha-LICENSE.txt`
+* [PHPMailer](//github.com/PHPMailer/PHPMailer) (LGPL) — used by the optional PHP contact form script (installed via Composer, not bundled)
