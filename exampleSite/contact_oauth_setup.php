@@ -1,6 +1,6 @@
 <?php
 /**
- * One-time helper to obtain a Gmail OAuth2 refresh token for contact_mail.php
+ * One-time helper to obtain a Gmail OAuth2 refresh token for contact_mail_smtp.php
  * ('oauth2' mode). Run it from the command line on any machine with PHP and
  * the Composer dependencies installed:
  *
@@ -20,7 +20,7 @@
  *
  * Then run this script, open the printed URL in a browser, sign in with the
  * Workspace account that should send the mail (its address must match $from
- * in contact_mail.php, or be a verified send-as alias), and consent. The
+ * in contact_mail_smtp.php, or be a verified send-as alias), and consent. The
  * browser is redirected to http://localhost/... which will fail to load -
  * that's fine; copy the full URL from the address bar and paste it here.
  */
@@ -68,11 +68,11 @@ if (!$refresh_token) {
     exit(1);
 }
 
-echo "\nSuccess! Put these values in your contact_mail.php config:\n\n";
+echo "\nSuccess! Put these values in your contact_mail_smtp.php config:\n\n";
 echo "  \$smtp_mode = 'oauth2';\n";
 echo "  \$oauth_client_id = '" . $client_id . "';\n";
 echo "  \$oauth_client_secret = '" . $client_secret . "';\n";
 echo "  \$oauth_refresh_token = '" . $refresh_token . "';\n";
 echo "  \$oauth_user = '<the Workspace account you just signed in with>';\n\n";
 echo "Keep them secret: store them outside the web root (see \$config_file\n";
-echo "in contact_mail.php) and never commit them to git.\n";
+echo "in contact_mail_smtp.php) and never commit them to git.\n";

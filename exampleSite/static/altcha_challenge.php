@@ -4,7 +4,7 @@
  *
  * The ALTCHA widget (served on the contact form) fetches a fresh, signed
  * proof-of-work challenge from this script before the form can be submitted.
- * contact_mail.php verifies the solved challenge with the same secrets.
+ * contact_mail_smtp.php verifies the solved challenge with the same secrets.
  *
  * Requirements:
  *   composer require altcha-org/altcha
@@ -17,7 +17,7 @@
  *   $altcha_hmac_secret = '<output of: php -r "echo bin2hex(random_bytes(32));">';
  *   $altcha_key_secret  = '<another random string, optional but recommended>';
  *
- * The same secrets must be used by contact_mail.php (both scripts load the
+ * The same secrets must be used by contact_mail_smtp.php (both scripts load the
  * same config file by default).
  */
 
@@ -38,7 +38,7 @@ $altcha_ttl = 300;
 $autoload_path = __DIR__ . '/vendor/autoload.php';
 
 # Optional: shared settings file OUTSIDE the web root (same file as
-# contact_mail.php). Any variable set there overrides the defaults above.
+# contact_mail_smtp.php). Any variable set there overrides the defaults above.
 $config_file = __DIR__ . '/../contact_mail_config.php';
 if (is_file($config_file)) {
     require $config_file;

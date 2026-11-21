@@ -216,14 +216,27 @@ If you're using formspree, you'll also need to set `formspree_email` to your ema
 
 If you're using netlify, you'll also want to set the `confirm_page = "url"` to a page on your site. That way after a user submits the form they'll be sent to a page with your customised thank you message, rather than a generic netlify page.
 
-#### PHP mail script (e.g. sending via Google Workspace)
-If your site is hosted on a server that runs PHP, set `service = "php"` and copy `static/contact_mail.php` from the `exampleSite` to your site's `static/` folder. The script sends the form through your organisation's Google Workspace account using [PHPMailer](https://github.com/PHPMailer/PHPMailer). Install the dependencies with [Composer](https://getcomposer.org), ideally outside the web root:
+#### PHP mail scripts
+If your site is hosted on a server that runs PHP, set `service = "php"` and copy one of the two interchangeable scripts from the `exampleSite`'s `static/` folder to your site's `static/` folder:
+
+* **`contact_mail.php`** — the simple option: sends with PHP's built-in `mail()` function, no dependencies. Edit the settings at the top (recipient, sender, subject, redirect pages). It works wherever the server's mail setup can deliver to the recipient — many shared hosts can; cloud VMs often need authenticated SMTP instead. It validates input and checks the hidden honeypot field, but cannot verify ALTCHA captcha payloads (it rejects them — use the SMTP script for captcha).
+* **`contact_mail_smtp.php`** — sends through your organisation's Google Workspace account using [PHPMailer](https://github.com/PHPMailer/PHPMailer) over SMTP, and supports the ALTCHA captcha. Install the dependencies with [Composer](https://getcomposer.org), ideally outside the web root:
+
+  ```
+  composer require phpmailer/phpmailer league/oauth2-google
+  ```
+
+Select which script the form posts to with `php_script` (defaults to `/contact_mail.php`):
 
 ```
-composer require phpmailer/phpmailer league/oauth2-google
+[params.contact]
+  service = "php"
+  php_script = "/contact_mail_smtp.php"
 ```
 
-Edit the settings at the top of `contact_mail.php` (recipient, sender, subject, redirect pages, and the path to Composer's `vendor/autoload.php`). The sender (`$from`) must be the authenticated Workspace account or a verified "send as" alias of it.
+Both scripts optionally load settings from `contact_mail_config.php` one directory above themselves — outside the web root when the script lives in your published `static/` folder. Any variables set there override the defaults in the script.
+
+**Sending via Google Workspace (SMTP script).** Edit the settings at the top of `contact_mail_smtp.php` (recipient, sender, subject, redirect pages, and the path to Composer's `vendor/autoload.php`). The sender (`$from`) must be the authenticated Workspace account or a verified "send as" alias of it.
 
 Google no longer accepts plain account passwords for SMTP. Choose one of the three supported modes via `$smtp_mode`:
 
@@ -235,15 +248,17 @@ Google no longer accepts plain account passwords for SMTP. Choose one of the thr
   3. Run the one-time helper `contact_oauth_setup.php` (in `exampleSite`, next to `hugo.toml`) on any machine with PHP: `php contact_oauth_setup.php`. It prints a URL; sign in with the sending Workspace account, consent, and paste back the redirect URL. It outputs the refresh token.
   4. Set `$smtp_mode = 'oauth2'` and fill in `$oauth_client_id`, `$oauth_client_secret` and `$oauth_refresh_token`.
 
-**Keep credentials secret.** Rather than editing credentials into `contact_mail.php` (which lives in your web root), put them in a separate config file *outside* the web root — the script automatically loads `../contact_mail_config.php` relative to itself if present, and any variables set there override the defaults. Never commit credentials to git. Sending failures are logged to the PHP error log.
+**Keep credentials secret.** Rather than editing credentials into `contact_mail_smtp.php` (which lives in your web root), put them in a separate config file *outside* the web root — the script automatically loads `../contact_mail_config.php` relative to itself if present, and any variables set there override the defaults. Never commit credentials to git. Sending failures are logged to the PHP error log.
 
 #### Captcha (ALTCHA)
 The PHP contact form can be protected with [ALTCHA](https://altcha.org), a self-hosted, MIT-licensed captcha. Instead of puzzles or tracking, the visitor's browser silently solves a small cryptographic proof-of-work challenge; your server verifies it before sending the mail. No cookies, no external service, no data leaves your server, and it is screen-reader accessible (WCAG 2.2 AA). A hidden honeypot field is also checked as a baseline. (The netlify and formspree backends include their own spam filtering, so this option applies to `service = "php"` only.)
 
+**The captcha requires the `contact_mail_smtp.php` script** (`php_script = "/contact_mail_smtp.php"`): verifying the proof-of-work needs the ALTCHA PHP library. The simple `contact_mail.php` script cannot verify payloads and rejects them, so don't enable the captcha while it is selected.
+
 Setup:
 
 1. Install the PHP library alongside PHPMailer: `composer require altcha-org/altcha`
-2. Copy `static/altcha_challenge.php` from the `exampleSite` to your site's `static/` folder (next to `contact_mail.php`). It issues fresh challenges to the widget.
+2. Copy `static/altcha_challenge.php` from the `exampleSite` to your site's `static/` folder (next to `contact_mail_smtp.php`). It issues fresh challenges to the widget.
 3. Generate two random secrets and put them — with your mail credentials — in the config file outside the web root (both scripts load the same file):
    ```php
    <?php // contact_mail_config.php

@@ -1,8 +1,8 @@
 # Friday, 20 Nov. 2026 (fork changes)
 * New home page feature: **recent posts** — links to a configurable number of recent posts (`[recent_posts]` in `_index.md`).
 * The home page is now **modular**: feature blocks live in `layouts/_partials/home/` and their order is set with a `features` list in `_index.md` frontmatter.
-* The PHP contact form now sends via **Google Workspace** (PHPMailer over SMTP: relay, app password, or OAuth2) instead of unauthenticated `mail()`.
-* Optional **ALTCHA captcha** for the PHP contact form: self-hosted, MIT-licensed, privacy-friendly proof-of-work — no external service, cookies, or tracking. Plus a honeypot field. See SETUP.md ("Captcha") for setup.
+* The PHP contact form now offers **two interchangeable scripts**, selected with `php_script`: the classic `mail()` script (hardened: input validation, header-injection protection, honeypot, fixed Reply-To) and an optional **PHPMailer/SMTP** script sending via Google Workspace (relay, app password, or OAuth2).
+* Optional **ALTCHA captcha** for the PHP contact form (requires the SMTP script): self-hosted, MIT-licensed, privacy-friendly proof-of-work — no external service, cookies, or tracking. Plus a honeypot field. See SETUP.md ("Captcha") for setup.
 
 # Saturday, 31 Oct. 2026
 [SCSS has been deprecated since Hugo v0.153](https://gohugo.io/functions/css/sass/), so I've changed the stylesheet to use plain CSS. The CSS is from [HTML5UP](https://html5up.net/alpha).

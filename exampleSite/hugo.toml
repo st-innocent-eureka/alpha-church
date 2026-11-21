@@ -161,18 +161,23 @@ enableEmoji = true
     #If you use formspree, you'll need to set your formspree form_id.
     #
     #If you use php, you need to host this site on a Server capable of running php.
-    # Please edit the /static/contact_mail.php file from the exampleSite.
-    # It sends via your Google Workspace account (SMTP relay, app password or
-    # OAuth2) and needs PHPMailer installed with Composer:
-    #   composer require phpmailer/phpmailer league/oauth2-google
-    # See SETUP.md ("Contact Form") for the Google-side setup.
+    # Two interchangeable mail scripts are provided in the exampleSite's static/
+    # folder; copy your chosen one to your site's static/ folder:
+    #   contact_mail.php      - simple, uses PHP's mail(), no dependencies
+    #   contact_mail_smtp.php - PHPMailer over SMTP via your Google Workspace
+    #                           account (relay, app password or OAuth2); also
+    #                           supports the ALTCHA captcha. Needs Composer:
+    #                           composer require phpmailer/phpmailer league/oauth2-google
+    # See SETUP.md ("Contact Form") for setup.
     service = "netlify" #or "formspree" or "php"
+    # php_script = "/contact_mail.php" #only used by php; or "/contact_mail_smtp.php"
     confirm_page = "/contact_thanks" #only used by netlify
     # formspree_formid="" #only used by formspree
 
     #Optional captcha for the php contact form: ALTCHA, a self-hosted,
     #privacy-friendly proof-of-work captcha (no external service).
-    #Requires PHP + Composer on the server; see SETUP.md ("Captcha").
+    #Requires the contact_mail_smtp.php script (PHP + Composer on the server);
+    #see SETUP.md ("Captcha").
     #[params.contact.captcha]
     #  service = "altcha"
     #  challenge_url = "/altcha_challenge.php" #default
