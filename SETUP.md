@@ -237,6 +237,31 @@ Google no longer accepts plain account passwords for SMTP. Choose one of the thr
 
 **Keep credentials secret.** Rather than editing credentials into `contact_mail.php` (which lives in your web root), put them in a separate config file *outside* the web root — the script automatically loads `../contact_mail_config.php` relative to itself if present, and any variables set there override the defaults. Never commit credentials to git. Sending failures are logged to the PHP error log.
 
+#### Captcha (ALTCHA)
+The PHP contact form can be protected with [ALTCHA](https://altcha.org), a self-hosted, MIT-licensed captcha. Instead of puzzles or tracking, the visitor's browser silently solves a small cryptographic proof-of-work challenge; your server verifies it before sending the mail. No cookies, no external service, no data leaves your server, and it is screen-reader accessible (WCAG 2.2 AA). A hidden honeypot field is also checked as a baseline. (The netlify and formspree backends include their own spam filtering, so this option applies to `service = "php"` only.)
+
+Setup:
+
+1. Install the PHP library alongside PHPMailer: `composer require altcha-org/altcha`
+2. Copy `static/altcha_challenge.php` from the `exampleSite` to your site's `static/` folder (next to `contact_mail.php`). It issues fresh challenges to the widget.
+3. Generate two random secrets and put them — with your mail credentials — in the config file outside the web root (both scripts load the same file):
+   ```php
+   <?php // contact_mail_config.php
+   $altcha_hmac_secret = '...'; # php -r "echo bin2hex(random_bytes(32));"
+   $altcha_key_secret  = '...'; # another random string (optional, recommended)
+   $captcha_service = 'altcha';
+   ```
+4. Enable the widget in `hugo.toml`:
+   ```
+   [params.contact.captcha]
+     service = "altcha"
+     #challenge_url = "/altcha_challenge.php" #default
+   ```
+
+The widget script (with translations) is bundled with the theme and self-hosted — no CDN. It loads only on pages that show the contact form, and localises itself to the page language. Verification enforces the challenge signature, expiry (5 minutes by default) and single use (solved payloads cannot be replayed). The site must be served over **HTTPS** (the widget uses the Web Crypto API, which requires a secure context; `localhost` works for development).
+
+Difficulty and lifetime can be tuned in `altcha_challenge.php` (`$altcha_cost`, `$altcha_counter_min/max`, `$altcha_ttl`). Keep the library up to date (`composer update altcha-org/altcha`) — like any security component, it receives occasional security fixes.
+
 If you'd like a contact form on another page, use an inline shortcode `{{< contact.inline >}}{{ partial "contact" . }}{{< /contact.inline >}}` **N.B. inline shortcodes must be [enabled in your config file](https://gohugo.io/templates/shortcode-templates/#inline-shortcodes).**
 
 ### 8. Links

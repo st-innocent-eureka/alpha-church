@@ -79,6 +79,20 @@
 			<div class="col-12">
 				<textarea name="message" aria-label="{{ i18n "messageLabel" }}" placeholder="{{ i18n "messageLabel" }}" rows="6" required></textarea>
 			</div>
+			{{ with .Site.Params.Contact.captcha }}
+				{{ if eq .service "altcha" }}
+			<div class="col-12">
+				<altcha-widget
+					challenge="{{ .challenge_url | default "/altcha_challenge.php" }}"
+					auto="onload"
+					language="{{ site.Language.Lang }}"
+					name="altcha"></altcha-widget>
+			</div>
+				{{ end }}
+			{{ end }}
+			<div class="col-12" style="display:none" aria-hidden="true">
+				<input type="text" name="website" tabindex="-1" autocomplete="off" />
+			</div>
 			<div class="col-12">
 				<ul class="actions special">
 					<li>
@@ -88,4 +102,10 @@
 			</div>
 		</div>
 	</form>
+	{{ with .Site.Params.Contact.captcha }}
+		{{ if eq .service "altcha" }}
+			{{ $altcha := resources.Get "js/altcha.i18n.min.js" | fingerprint }}
+			<script src="{{ $altcha.RelPermalink }}" integrity="{{ $altcha.Data.Integrity }}" crossorigin="anonymous" defer></script>
+		{{ end }}
+	{{ end }}
 {{ end }}

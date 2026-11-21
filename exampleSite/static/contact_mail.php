@@ -27,6 +27,13 @@
  *   composer require phpmailer/phpmailer league/oauth2-google
  * (league/oauth2-google is only used in 'oauth2' mode.)
  *
+ * Captcha: set $captcha_service = 'altcha' to require a solved ALTCHA
+ * proof-of-work challenge (self-hosted, no external service). This needs
+ *   composer require altcha-org/altcha
+ * and the altcha_challenge.php endpoint published alongside this script,
+ * with matching $altcha_hmac_secret / $altcha_key_secret secrets.
+ * A hidden honeypot field is always checked as a baseline.
+ *
  * SECURITY: keep credentials out of the web root. Put them in a separate
  * config file outside the published site (see $config_file below) rather
  * than editing them into this file, and never commit them to git.
@@ -63,6 +70,15 @@ $oauth_refresh_token = 'INSERT REFRESH TOKEN';
 # The Workspace account the refresh token was issued for:
 $oauth_user = 'website@example.org';
 
+# ---- Captcha ---------------------------------------------------------------
+
+# '' (disabled) or 'altcha' (self-hosted ALTCHA proof-of-work captcha):
+$captcha_service = '';
+# Secrets shared with altcha_challenge.php. MUST be long random strings,
+# set in the external config file (see $config_file below):
+$altcha_hmac_secret = '';
+$altcha_key_secret = '';
+
 # Path to Composer's autoloader (adjust to your server layout; keeping the
 # vendor directory outside the web root is recommended):
 $autoload_path = __DIR__ . '/vendor/autoload.php';
@@ -79,6 +95,38 @@ if (is_file($config_file)) {
 function fail($page) {
     header('Location: ' . $page);
     exit;
+}
+
+/**
+ * Single-use guard for ALTCHA payloads: remember solved payloads until they
+ * expire so a captured payload cannot be replayed. Returns true if this is
+ * the first use. Uses a small JSON file in the system temp directory.
+ */
+function altcha_claim_payload($payload_b64, $expires_at) {
+    $file = sys_get_temp_dir() . '/altcha_used_' . md5(__DIR__) . '.json';
+    $hash = hash('sha256', $payload_b64);
+    $now = time();
+    $fp = @fopen($file, 'c+');
+    if ($fp === false) {
+        # Availability over strictness: if the store is unwritable, log and
+        # accept (the challenge signature and expiry are still enforced).
+        error_log('contact_mail.php: ALTCHA replay store unwritable: ' . $file);
+        return true;
+    }
+    flock($fp, LOCK_EX);
+    $used = json_decode(stream_get_contents($fp) ?: '[]', true) ?: [];
+    $used = array_filter($used, function ($exp) use ($now) { return $exp > $now; });
+    $fresh = !isset($used[$hash]);
+    if ($fresh) {
+        $used[$hash] = $expires_at;
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($used));
+        fflush($fp);
+    }
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return $fresh;
 }
 
 if (!isset($_POST['send'])) {
@@ -102,6 +150,11 @@ $body = "Name: " . $name . "\n\n"
       . "Email: " . $email . "\n\n"
       . "Message:\n" . $message . "\n";
 
+# Honeypot: the hidden "website" field must stay empty (bots fill it in).
+if (!empty($_POST['website'])) {
+    fail($error_page);
+}
+
 # ---- Send ------------------------------------------------------------------
 
 try {
@@ -110,6 +163,34 @@ try {
             . ' - run: composer require phpmailer/phpmailer league/oauth2-google');
     }
     require $autoload_path;
+
+    # ALTCHA captcha: verify the solved proof-of-work challenge before sending.
+    if ($captcha_service === 'altcha') {
+        $payload_b64 = $_POST['altcha'] ?? '';
+        if (!is_string($payload_b64) || $payload_b64 === '') {
+            throw new RuntimeException('ALTCHA payload missing');
+        }
+        if ($altcha_hmac_secret === '') {
+            throw new RuntimeException('$altcha_hmac_secret is not configured');
+        }
+        $altcha = new AltchaOrg\Altcha\Altcha(
+            hmacSignatureSecret: $altcha_hmac_secret,
+            hmacKeySignatureSecret: $altcha_key_secret !== '' ? $altcha_key_secret : null,
+        );
+        $verify_options = new AltchaOrg\Altcha\VerifySolutionOptions(
+            $payload_b64,
+            new AltchaOrg\Altcha\Algorithm\Pbkdf2(),
+        );
+        $result = $altcha->verifySolution($verify_options);
+        if (!$result->verified) {
+            throw new RuntimeException('ALTCHA verification failed'
+                . ($result->expired ? ' (challenge expired)' : ''));
+        }
+        $expires_at = (int) ($verify_options->payload->challenge->parameters->expiresAt ?? time() + 300);
+        if (!altcha_claim_payload($payload_b64, $expires_at)) {
+            throw new RuntimeException('ALTCHA payload already used (replay)');
+        }
+    }
 
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
     $mail->isSMTP();
