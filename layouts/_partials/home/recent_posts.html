@@ -14,7 +14,7 @@
 				{{ range $pages }}
 					<li>
 						<a href="{{ .Permalink }}">{{ if .Draft }}DRAFT: {{ end }}{{ .Title | markdownify }}</a>
-						<time class="date-meta">({{ .Date.Format "Jan 2, 2006" }})</time>
+						<time class="date-meta">({{ .Date | time.Format ":date_long" }})</time>
 					</li>
 				{{ end }} {{/* end range $pages */}}
 			</ul>
