@@ -1,0 +1,9 @@
+<!-- layouts/_partials/calendar-resources.html -->
+{{ $js := hugo.Data.libs.js }}
+{{ $service := site.Params.calendar.service }}
+
+{{ if eq $service "google" }}
+    {{ "<!-- FullCalendar -->" | safeHTML }}
+    {{ printf "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/%s/index.global.min.js\" integrity=\"%s\" crossorigin=\"anonymous\"></script>" $js.fullcalendar.version $js.fullcalendar.integrity | safeHTML }}
+    {{ printf "<script src=\"https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@%s/index.global.min.js\" integrity=\"%s\" crossorigin=\"anonymous\"></script>" $js.fullcalendar_google.version $js.fullcalendar_google.integrity | safeHTML }}
+{{ end }}

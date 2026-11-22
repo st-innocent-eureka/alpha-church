@@ -45,4 +45,9 @@
 				{{ partial "map-resources.html" }}
 			{{- end -}}
 		{{- end -}}
+		{{- with site.Params.calendar -}}
+			{{- if and .service ($.Page.HasShortcode "calendar") -}}
+				{{ partial "calendar-resources.html" }}
+			{{- end -}}
+		{{- end -}}
 	</head>

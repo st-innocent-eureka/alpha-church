@@ -1,0 +1,83 @@
+<!-- layouts/_partials/calendar.html -->
+{{ $cal := site.Params.calendar | default dict }}
+{{ $service := $cal.service | default "embed" }}
+{{ $id := .id | default "calendar" }}
+{{ $height := .height | default $cal.height | default 600 }}
+
+{{ if not $cal.calendar_id }}
+  <p><strong>Calendar not configured.</strong> Set <code>calendar_id</code> in <code>[params.calendar]</code> in your site configuration. See SETUP.md.</p>
+{{ else }}
+
+  {{ $ids := $cal.calendar_id }}
+  {{ if not (reflect.IsSlice $ids) }}{{ $ids = slice $ids }}{{ end }}
+
+  {{ if eq $service "google" }}
+
+    {{ $view := .view | default $cal.view | default "dayGridMonth" }}
+    {{ $tz := $cal.timezone | default "local" }}
+    {{ $sources := slice }}
+    {{ range $ids }}{{ $sources = $sources | append (dict "googleCalendarId" .) }}{{ end }}
+
+    <div id="{{ $id }}" class="alpha-calendar"></div>
+    <style>
+      .alpha-calendar { margin: 0 0 2em 0; }
+      .alpha-calendar .fc {
+        font-family: inherit;
+        --fc-border-color: #e5e5e5;
+        --fc-page-bg-color: #ffffff;
+        --fc-neutral-bg-color: #f8f8f8;
+        --fc-today-bg-color: #fbf0ec;
+        --fc-event-bg-color: #e89980;
+        --fc-event-border-color: #e89980;
+        --fc-event-text-color: #ffffff;
+        --fc-button-bg-color: #666666;
+        --fc-button-border-color: #666666;
+        --fc-button-text-color: #ffffff;
+        --fc-button-hover-bg-color: #555555;
+        --fc-button-hover-border-color: #555555;
+        --fc-button-active-bg-color: #e89980;
+        --fc-button-active-border-color: #e89980;
+        --fc-list-event-hover-bg-color: #f5f5f5;
+      }
+      .alpha-calendar .fc .fc-button { text-transform: none; box-shadow: none; }
+      .alpha-calendar .fc a { border-bottom: none; }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var height = {{ $height | jsonify | safeJS }};
+        if (typeof height === 'string' && /^\d+$/.test(height)) { height = parseInt(height, 10); }
+        var calendar = new FullCalendar.Calendar(document.getElementById('{{ $id }}'), {
+          googleCalendarApiKey: {{ $cal.api_key | jsonify | safeJS }},
+          eventSources: {{ $sources | jsonify | safeJS }},
+          initialView: {{ $view | jsonify | safeJS }},
+          timeZone: {{ $tz | jsonify | safeJS }},
+          height: height,
+          headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listMonth' },
+          buttonText: { today: 'Today', month: 'Month', list: 'Agenda' },
+          dayMaxEvents: true,
+          nowIndicator: true,
+          eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' }
+        });
+        calendar.render();
+      });
+    </script>
+
+  {{ else }}
+
+    {{/* Fallback: Google's own iframe embed. No API key or JavaScript required. */}}
+    {{ $mode := $cal.mode | default "MONTH" }}
+    {{ $query := slice }}
+    {{ range $ids }}{{ $query = $query | append (printf "src=%s" (. | urlquery)) }}{{ end }}
+    {{ with $cal.timezone }}{{ $query = $query | append (printf "ctz=%s" (. | urlquery)) }}{{ end }}
+    {{ $query = $query | append (printf "mode=%s" $mode) "showTitle=0" "showPrint=0" "showCalendars=0" }}
+    {{ $embedHeight := 600 }}
+    {{ if ne (printf "%v" $height) "auto" }}{{ $embedHeight = int $height }}{{ end }}
+    <iframe class="alpha-calendar-embed"
+      src="https://calendar.google.com/calendar/embed?{{ delimit $query "&" | safeURL }}"
+      title="{{ site.Title }} calendar"
+      width="100%" height="{{ $embedHeight }}"
+      style="border: 0; margin: 0 0 2em 0;" frameborder="0" scrolling="no" loading="lazy"></iframe>
+
+  {{ end }}
+
+{{ end }}
