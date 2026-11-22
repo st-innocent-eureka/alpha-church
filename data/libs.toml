@@ -18,6 +18,16 @@
   version = "5.2.0"
   integrity = "sha384-jnZyxPjiipYXnSU0ygqeac2q7CVYMbh84q0uHVRRxEtvFPiQYbXWUorga2aqZJ0z"
 
+[js.fullcalendar]
+  # Standard bundle (core, dayGrid, timeGrid, list, interaction)
+  version = "6.1.22"
+  integrity = "sha512-l/B0GJmJlHwAwwopZ/dvCJChbHC8t0nn+OzwZrrDoM2kO8bmRuaE877El2Lft17/pWELmfO4BVyD4jRq6uMHZg=="
+
+[js.fullcalendar_google]
+  # Google Calendar plugin for FullCalendar; must match the fullcalendar version
+  version = "6.1.22"
+  integrity = "sha512-PBYVomNo+1BIUGoQ3fo7EGzahlkceikICqFeH0lET/N9KhsxsHdFU9fwBnRufb2Zd3WqNIeZzFvc8aAjiga4Fw=="
+
 # CSS
 [css.leaflet]
   version = "1.9.4"

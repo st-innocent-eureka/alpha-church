@@ -1,0 +1,11 @@
+{{- $view := "" -}}
+{{- with .Get "view" }}{{ $view = . }}{{ end -}}
+{{- $height := "" -}}
+{{- with .Get "height" }}{{ $height = . }}{{ end -}}
+
+{{- $details := dict
+    "id" (printf "calendar_%d" .Ordinal)
+    "view" $view
+    "height" $height
+    -}}
+{{- partial "calendar.html" $details -}}

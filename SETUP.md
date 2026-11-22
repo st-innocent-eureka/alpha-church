@@ -313,6 +313,52 @@ Configuration in [params]. Set `bible_popups = "faithlife"` to include Bible ref
 
 You may also set the bible translation by defining `bible_version = "ESV"` (or NLT, KJV, CSB, etc.). If you don't define a translation, the default *ESV* will be used.
 
+### 9. Calendar
+Display a live calendar on any page with the `calendar` shortcode:
+
+```
+{{</* calendar */>}}
+```
+
+Events are fetched in the visitor's browser, so the calendar is always up to date without rebuilding the site. Two services are available, configured in `hugo.toml`:
+
+#### a. Google embed (no API key)
+The simplest option uses Google's own calendar iframe. In Google Calendar, open **Settings → [your calendar] → Access permissions** and tick *Make available to public*. Then find the **Calendar ID** on the calendar's settings page (it looks like an email address) and set:
+
+```
+[params.calendar]
+  service = "embed"
+  calendar_id = "your-calendar-id@group.calendar.google.com"
+```
+
+Optional settings: `timezone` (e.g. `"America/New_York"`; defaults to the visitor's timezone), `mode` (`"MONTH"`, `"WEEK"` or `"AGENDA"`), and `height` (pixels, default 600). The iframe uses Google's styling and cannot be themed.
+
+#### b. FullCalendar (themeable, recommended)
+[FullCalendar](https://fullcalendar.io) renders the calendar in the theme's colours and fonts, with month and agenda views. It reads events through the Google Calendar API, which needs a free API key:
+
+1. Make the calendar public as above, and copy its Calendar ID.
+2. In the [Google Cloud Console](https://console.cloud.google.com/), create a project, enable the **Google Calendar API**, and create an API key under *Credentials*. Restrict the key to the Google Calendar API (and optionally to your website's domain).
+3. Configure:
+
+```
+[params.calendar]
+  service = "google"
+  calendar_id = "your-calendar-id@group.calendar.google.com"
+  api_key = "XXXXXXXX"
+```
+
+Optional settings: `timezone`, `view` (initial view: `"dayGridMonth"`, `"listMonth"`, `"timeGridWeek"` or `"dayGridWeek"`; default `dayGridMonth`), and `height` (pixels or `"auto"`).
+
+Both services accept a list of calendar IDs to overlay several calendars:
+
+```
+  calendar_id = ["one@group.calendar.google.com", "two@group.calendar.google.com"]
+```
+
+The view and height can be overridden per page: `{{</* calendar view="listMonth" height="auto" */>}}`.
+
+> The API key is visible to visitors (as it is with Google Maps); restricting it to the Google Calendar API and your domain keeps it safe. Only ever use a *public* calendar — private calendar data must never be exposed this way.
+
 ## Nearly finished
 
 To preview your site, run Hugo's built-in local server.
