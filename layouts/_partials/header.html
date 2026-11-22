@@ -45,8 +45,8 @@
 				{{ partial "map-resources.html" }}
 			{{- end -}}
 		{{- end -}}
-		{{- if isset site.Params.Calendar "service" -}}
-			{{- if .Page.HasShortcode "calendar" -}}
+		{{- with site.Params.calendar -}}
+			{{- if and .service ($.Page.HasShortcode "calendar") -}}
 				{{ partial "calendar-resources.html" }}
 			{{- end -}}
 		{{- end -}}
