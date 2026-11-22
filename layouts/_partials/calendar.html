@@ -1,5 +1,5 @@
 <!-- layouts/_partials/calendar.html -->
-{{ $cal := site.Params.calendar }}
+{{ $cal := site.Params.calendar | default dict }}
 {{ $service := $cal.service | default "embed" }}
 {{ $id := .id | default "calendar" }}
 {{ $height := .height | default $cal.height | default 600 }}

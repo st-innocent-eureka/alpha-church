@@ -156,18 +156,20 @@ enableEmoji = true
     #language = "fr" #Optional
     #region = "FR" #Optional
 
-  [params.calendar]
-    service = "embed" #"embed" for Google's iframe (no API key needed), or "google" for the FullCalendar widget, see SETUP.md
-    calendar_id = "en.usa#holiday@group.v.calendar.google.com" #Demo: US public holidays. Replace with your own calendar ID.
-    #calendar_id = ["calendar-one@group.calendar.google.com", "calendar-two@group.calendar.google.com"] #Multiple calendars
-    #timezone = "America/New_York" #Optional, defaults to the visitor's local timezone
-    #height = 600 #Optional, pixels or "auto" (FullCalendar only)
-    #mode = "MONTH" #embed only: "MONTH", "WEEK" or "AGENDA"
-    # For the FullCalendar widget, make your calendar public and create an API key
-    # restricted to the Google Calendar API, then uncomment:
-    #service = "google"
-    #api_key = "INSERT API KEY HERE"
-    #view = "dayGridMonth" #Optional: "dayGridMonth", "listMonth", "timeGridWeek", "dayGridWeek"
+  # Live calendar, see SETUP.md ("Calendar"). Uncomment and set your own
+  # public Google Calendar ID to enable the demo page at /calendar.
+  #[params.calendar]
+  #  service = "embed" #"embed" for Google's iframe (no API key needed), or "google" for the FullCalendar widget, see SETUP.md
+  #  calendar_id = "INSERT CALENDAR ID HERE" #e.g. "your-calendar-id@group.calendar.google.com"
+  #  #calendar_id = ["calendar-one@group.calendar.google.com", "calendar-two@group.calendar.google.com"] #Multiple calendars
+  #  #timezone = "America/New_York" #Optional, defaults to the visitor's local timezone
+  #  #height = 600 #Optional, pixels or "auto" (FullCalendar only)
+  #  #mode = "MONTH" #embed only: "MONTH", "WEEK" or "AGENDA"
+  #  # For the FullCalendar widget, make your calendar public and create an API key
+  #  # restricted to the Google Calendar API, then uncomment:
+  #  #service = "google"
+  #  #api_key = "INSERT API KEY HERE"
+  #  #view = "dayGridMonth" #Optional: "dayGridMonth", "listMonth", "timeGridWeek", "dayGridWeek"
 
   [params.contact]
     #Use this section to automate contact form.
