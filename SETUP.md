@@ -291,9 +291,13 @@ Setup:
      #challenge_url = "/altcha_challenge.php" #default
    ```
 
-The widget script (with translations) is bundled with the theme and self-hosted — no CDN. It loads only on pages that show the contact form, and localises itself to the page language. Verification enforces the challenge signature, expiry (5 minutes by default) and single use (solved payloads cannot be replayed). The site must be served over **HTTPS** (the widget uses the Web Crypto API, which requires a secure context; `localhost` works for development).
+The widget script (with translations) is bundled with the theme and self-hosted — no CDN. It loads only on pages that show the contact form (once per page, even if the form appears twice), and localises itself to the page language. Verification enforces the challenge signature, expiry (5 minutes by default) and single use (solved payloads cannot be replayed). The site must be served over **HTTPS** (the widget uses the Web Crypto API, which requires a secure context; `localhost` works for development). Hugo warns at build time if the captcha is enabled while the form still posts to the classic `mail()` script or the `baseURL` is plain HTTP.
+
+**Bundled widget provenance:** `assets/js/altcha.i18n.min.js` is the official ALTCHA **v3.7.0** i18n UMD build from [altcha-org/altcha](https://github.com/altcha-org/altcha) (MIT; license text alongside it in `assets/js/altcha-LICENSE.txt`, not published with your site). To update: download the newer `altcha.i18n.min.js` from the [ALTCHA releases](https://github.com/altcha-org/altcha/releases) (or the `altcha` npm package's `dist/`), replace the file, and refresh the license text if it changed. The asset is fingerprinted with SRI at build time, so no manual hash maintenance is needed.
 
 Difficulty and lifetime can be tuned in `altcha_challenge.php` (`$altcha_cost`, `$altcha_counter_min/max`, `$altcha_ttl`). Keep the library up to date (`composer update altcha-org/altcha`) — like any security component, it receives occasional security fixes.
+
+The single-use (replay) guard keeps a small JSON file in the system temp directory. If that file is unwritable, the default behaviour is to log loudly and accept the payload — the challenge signature and expiry are still enforced, so the form keeps working on misconfigured hosts. Set `$altcha_replay_strict = true;` in the config file to reject payloads instead (fail closed).
 
 If you'd like a contact form on another page, use an inline shortcode `{{< contact.inline >}}{{ partial "contact" . }}{{< /contact.inline >}}` **N.B. inline shortcodes must be [enabled in your config file](https://gohugo.io/templates/shortcode-templates/#inline-shortcodes).**
 
