@@ -1,13 +1,14 @@
-{{/* Recent posts feature: links to the most recent posts in a section. */}}
-{{ if .Params.Recent_posts.enable }}
-	{{ $section := .Params.Recent_posts.section | default "posts" }}
-	{{ $count := .Params.Recent_posts.count | default 5 }}
+{{/* Recent posts feature: links to the most recent posts in a section.
+    Context: dict with "params" (settings block) and "suffix" (anchor suffix). */}}
+{{ if .params.enable }}
+	{{ $section := .params.section | default "posts" }}
+	{{ $count := .params.count | default 5 }}
 	{{ $pages := first $count (where site.RegularPages "Type" $section) }}
 	{{ if $pages }}
-		<a name="recent-posts"></a>
+		<a name="recent-posts{{ .suffix }}"></a>
 		<section class="box special">
 			<header class="major">
-				<h2>{{ .Params.Recent_posts.title | default (i18n "recentPosts") }}</h2>
+				<h2>{{ .params.title | default (i18n "recentPosts") }}</h2>
 			</header>
 			<hr />
 			<ul class="recent-posts">
@@ -18,11 +19,11 @@
 					</li>
 				{{ end }} {{/* end range $pages */}}
 			</ul>
-			{{ with .Params.Recent_posts.button_text }}
+			{{ with .params.button_text }}
 				<ul class="actions special">
 					<li><a href="{{ $section | absURL }}" class="button alt">{{ . }}</a></li>
 				</ul>
 			{{ end }}
 		</section>
 	{{ end }} {{/* end if $pages */}}
-{{ end }} {{/* end if Recent_posts*/}}
+{{ end }} {{/* end if .params.enable */}}

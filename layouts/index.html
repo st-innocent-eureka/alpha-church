@@ -14,14 +14,33 @@
 					{{/* Feature blocks are rendered in the order given by the
 					    "features" list in _index.md frontmatter. Each feature
 					    is a partial in _partials/home/ and decides for itself
-					    whether it is enabled. Defaults to the order below. */}}
+					    whether it is enabled. Defaults to the order below.
+					    An entry is either a feature name, or a table
+					    { feature = "name", key = "settings_block" } to render
+					    the same feature again from a different settings block. */}}
 					{{ $features := .Params.features | default (slice "services" "recent_posts" "feature_icons" "feature_images") }}
 					{{ range $features }}
-						{{ $partial := printf "home/%s" . }}
-						{{ if templates.Exists (printf "_partials/%s.html" $partial) }}
-							{{ partial $partial $ }}
+						{{ $name := . }}
+						{{ $key := . }}
+						{{ if reflect.IsMap . }}
+							{{ $name = .feature }}
+							{{ $key = .key | default $name }}
+						{{ end }}
+						{{ $key = ($key | default "") | lower }}
+						{{ $partial := printf "home/%s" $name }}
+						{{ if not (templates.Exists (printf "_partials/%s.html" $partial)) }}
+							{{ warnf "Unknown home page feature %q in %s" $name $.File.Path }}
 						{{ else }}
-							{{ warnf "Unknown home page feature %q in %s" . $.File.Path }}
+							{{/* Extra instances get an anchor/ID suffix so links and map containers stay unique. */}}
+							{{ $suffix := "" }}
+							{{ if ne $key $name }}{{ $suffix = printf "-%s" ($key | urlize) }}{{ end }}
+							{{ $params := index $.Params $key }}
+							{{ if $params }}
+								{{ partial $partial (dict "params" $params "suffix" $suffix) }}
+							{{ else if $suffix }}
+								{{/* A missing default block is a normal opt-out; only an explicit key is likely a typo. */}}
+								{{ warnf "No settings block %q for home page feature %q in %s" $key $name $.File.Path }}
+							{{ end }}
 						{{ end }}
 					{{ end }} {{/* end range $features */}}
 
