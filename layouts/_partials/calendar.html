@@ -21,7 +21,8 @@
     <div id="{{ $id }}" class="alpha-calendar"></div>
     <style>
       .alpha-calendar { margin: 0 0 2em 0; }
-      .alpha-calendar .fc {
+      /* FullCalendar v6 adds .fc to the container element itself */
+      .alpha-calendar.fc {
         font-family: inherit;
         --fc-border-color: #e5e5e5;
         --fc-page-bg-color: #ffffff;
@@ -39,8 +40,8 @@
         --fc-button-active-border-color: #e89980;
         --fc-list-event-hover-bg-color: #f5f5f5;
       }
-      .alpha-calendar .fc .fc-button { text-transform: none; box-shadow: none; }
-      .alpha-calendar .fc a { border-bottom: none; }
+      .alpha-calendar.fc .fc-button { text-transform: none; box-shadow: none; }
+      .alpha-calendar.fc a { border-bottom: none; }
     </style>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
