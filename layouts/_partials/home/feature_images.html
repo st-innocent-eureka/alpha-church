@@ -1,8 +1,9 @@
-{{/* Feature images feature: tiles with a featured image, title, text and optional button. */}}
-{{ if .Params.Feature_images.enable }}
-	{{ $tiles := .Params.Feature_images.tile }}
+{{/* Feature images feature: tiles with a featured image, title, text and optional button.
+    Context: dict with "params" (settings block) and "suffix" (anchor suffix). */}}
+{{ if .params.enable }}
+	{{ $tiles := .params.tile }}
 	{{ $len := (len $tiles) }}
-	<a name="feature-images"></a>
+	<a name="feature-images{{ .suffix }}"></a>
 	<div class="row">
 		{{ range $index, $key := $tiles }}
 			<div class="col-6 col-12-narrower">

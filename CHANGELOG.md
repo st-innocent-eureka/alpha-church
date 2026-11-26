@@ -1,6 +1,11 @@
+# Sunday, 23 Nov. 2026 (fork changes)
+* ALTCHA captcha hardening and packaging: Hugo now warns at build time if the captcha is enabled while the form posts to the classic `mail()` script or the `baseURL` is plain HTTP; the widget script is emitted once per page even if the form appears twice; new `$altcha_replay_strict` option makes the replay guard fail closed when its store is unwritable (default remains availability-first, loudly logged); the widget license moved out of published `static/` files; SETUP.md documents the bundled widget's provenance and update procedure.
+
 # Friday, 20 Nov. 2026 (fork changes)
 * New home page feature: **recent posts** — links to a configurable number of recent posts (`[recent_posts]` in `_index.md`).
 * The home page is now **modular**: feature blocks live in `layouts/_partials/home/` and their order is set with a `features` list in `_index.md` frontmatter.
+* Home page features can be **repeated with different content**: a `features` entry can be an inline table `{ feature = "feature_icons", key = "feature_icons_youth" }` naming a second settings block. Extra instances get unique anchors and map container IDs. Note for sites overriding the `home/` partials: they now receive a dict (`params`, `suffix`) instead of the page.
+* The feature icons block takes an optional `title` heading above its tiles, so repeated icon groups can be labelled.
 * The PHP contact form now offers **two interchangeable scripts**, selected with `php_script`: the classic `mail()` script (hardened: input validation, header-injection protection, honeypot, fixed Reply-To) and an optional **PHPMailer/SMTP** script sending via Google Workspace (relay, app password, or OAuth2).
 * Optional **ALTCHA captcha** for the PHP contact form (requires the SMTP script): self-hosted, MIT-licensed, privacy-friendly proof-of-work — no external service, cookies, or tracking. Plus a honeypot field. See SETUP.md ("Captcha") for setup.
 

@@ -102,7 +102,15 @@ features = ["recent_posts", "services", "feature_icons", "feature_images"]
 
 Only the features named in the list are rendered, in the order given (each still needs to be enabled in its own settings block). If the list is omitted, all four features are rendered in the default order: services, recent posts, feature icons, feature images. The banner always stays at the top of the page and the contact form (CTA) at the bottom.
 
-Note that entries in the list are not deduplicated: a feature named twice is rendered twice. Avoid repeats — duplicate blocks produce duplicate HTML anchors, and a repeated services block breaks its map (the map container ID must be unique on the page).
+A feature can appear more than once with different content. Instead of a plain name, use an inline table with `feature` (the block to render) and `key` (the settings block to read it from):
+
+```
+features = ["services", "feature_icons", { feature = "feature_icons", key = "feature_icons_youth" }]
+```
+
+Then add a `[feature_icons_youth]` settings block in the same format as `[feature_icons]`. Any feature can be repeated this way, including services and recent posts. This works with both TOML and YAML frontmatter (in YAML, a repeat entry is a list item with `feature:` and `key:` fields). The plain instance keeps its usual anchor (`#feature-icons`); an instance with a different key gets an anchor suffixed with the key (`#feature-icons-feature_icons_youth`), and a repeated services block gets its own map container ID, so links and maps stay unique.
+
+Entries are not deduplicated: a plain name listed twice still renders the same content twice with duplicate anchors — use a different `key` for each instance instead. A `key` with no matching settings block logs a warning and is skipped.
 
 Each feature block is a partial in `layouts/_partials/home/`, so new features can be added by creating a partial there and naming it in the `features` list.
 
@@ -150,6 +158,16 @@ These feature icons are pulled from [fontawesome](https://fontawesome.com). The 
   text = "Meeting together to hear."
 ```
 The value of the `icon` and `icon_pack` setting is found on the FontAwesome site. `Accent` is a colour scheme set in the css (there are 5 accent colours).
+
+An optional `title` directly under `[feature_icons]` (not under a tile) adds a heading above the tiles:
+
+```
+[feature_icons]
+  enable = true
+  title = "Our Ministries"
+```
+
+This is especially useful when the block is repeated with different content, so each group of tiles can be labelled.
 
 #### e. Feature Images
 Like the *Feature Icons* this section looks best with an even number of entries.
@@ -273,9 +291,13 @@ Setup:
      #challenge_url = "/altcha_challenge.php" #default
    ```
 
-The widget script (with translations) is bundled with the theme and self-hosted — no CDN. It loads only on pages that show the contact form, and localises itself to the page language. Verification enforces the challenge signature, expiry (5 minutes by default) and single use (solved payloads cannot be replayed). The site must be served over **HTTPS** (the widget uses the Web Crypto API, which requires a secure context; `localhost` works for development).
+The widget script (with translations) is bundled with the theme and self-hosted — no CDN. It loads only on pages that show the contact form (once per page, even if the form appears twice), and localises itself to the page language. Verification enforces the challenge signature, expiry (5 minutes by default) and single use (solved payloads cannot be replayed). The site must be served over **HTTPS** (the widget uses the Web Crypto API, which requires a secure context; `localhost` works for development). Hugo warns at build time if the captcha is enabled while the form still posts to the classic `mail()` script or the `baseURL` is plain HTTP.
+
+**Bundled widget provenance:** `assets/js/altcha.i18n.min.js` is the official ALTCHA **v3.7.0** i18n UMD build from [altcha-org/altcha](https://github.com/altcha-org/altcha) (MIT; license text alongside it in `assets/js/altcha-LICENSE.txt`, not published with your site). To update: download the newer `altcha.i18n.min.js` from the [ALTCHA releases](https://github.com/altcha-org/altcha/releases) (or the `altcha` npm package's `dist/`), replace the file, and refresh the license text if it changed. The asset is fingerprinted with SRI at build time, so no manual hash maintenance is needed.
 
 Difficulty and lifetime can be tuned in `altcha_challenge.php` (`$altcha_cost`, `$altcha_counter_min/max`, `$altcha_ttl`). Keep the library up to date (`composer update altcha-org/altcha`) — like any security component, it receives occasional security fixes.
+
+The single-use (replay) guard keeps a small JSON file in the system temp directory. If that file is unwritable, the default behaviour is to log loudly and accept the payload — the challenge signature and expiry are still enforced, so the form keeps working on misconfigured hosts. Set `$altcha_replay_strict = true;` in the config file to reject payloads instead (fail closed).
 
 If you'd like a contact form on another page, use an inline shortcode `{{< contact.inline >}}{{ partial "contact" . }}{{< /contact.inline >}}` **N.B. inline shortcodes must be [enabled in your config file](https://gohugo.io/templates/shortcode-templates/#inline-shortcodes).**
 

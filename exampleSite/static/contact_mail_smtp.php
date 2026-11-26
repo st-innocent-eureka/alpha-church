@@ -81,6 +81,13 @@ $captcha_service = '';
 # set in the external config file (see $config_file below):
 $altcha_hmac_secret = '';
 $altcha_key_secret = '';
+# Replay-guard strictness. The single-use store is a small JSON file in the
+# system temp directory. If it is unwritable:
+#   false (default) - log loudly and accept the payload (the challenge
+#                     signature and expiry are still enforced); keeps the
+#                     form working on misconfigured hosts.
+#   true            - reject the payload (fail closed).
+$altcha_replay_strict = false;
 
 # Path to Composer's autoloader (adjust to your server layout; keeping the
 # vendor directory outside the web root is recommended):
@@ -106,15 +113,17 @@ function fail($page) {
  * the first use. Uses a small JSON file in the system temp directory.
  */
 function altcha_claim_payload($payload_b64, $expires_at) {
+    global $altcha_replay_strict;
     $file = sys_get_temp_dir() . '/altcha_used_' . md5(__DIR__) . '.json';
     $hash = hash('sha256', $payload_b64);
     $now = time();
     $fp = @fopen($file, 'c+');
     if ($fp === false) {
-        # Availability over strictness: if the store is unwritable, log and
-        # accept (the challenge signature and expiry are still enforced).
+        # Unwritable store: accept by default (signature and expiry are still
+        # enforced), or reject when $altcha_replay_strict is set. Either way,
+        # log loudly so the misconfiguration gets fixed.
         error_log('contact_mail_smtp.php: ALTCHA replay store unwritable: ' . $file);
-        return true;
+        return !$altcha_replay_strict;
     }
     flock($fp, LOCK_EX);
     $used = json_decode(stream_get_contents($fp) ?: '[]', true) ?: [];
